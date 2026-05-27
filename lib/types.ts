@@ -15,12 +15,13 @@ export type SimulationRequest = {
 
 export type SimulationResult = {
   personaId: string;
-  reaksjon: string;
-  bekymringer: string[];
-  positive_aspekter: string[];
-  villighet_til_endring: number;
-  barrier: string;
-  forslag: string;
+  reaksjon?: string;
+  bekymringer?: string[];
+  positive_aspekter?: string[];
+  villighet_til_endring?: number;
+  barrier?: string;
+  forslag?: string;
+  error?: string;
 };
 
 export type TestResult = {

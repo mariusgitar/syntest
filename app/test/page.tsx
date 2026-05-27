@@ -68,8 +68,8 @@ export default function TestPage() {
         throw new Error("Simulation failed");
       }
 
-      const data: SimulationResult[] = await response.json();
-      setResults(data);
+      const data: { results: SimulationResult[] } = await response.json();
+      setResults(data.results);
     } catch (_error) {
       setError("Noe gikk galt under simulering. Prøv igjen.");
     } finally {
@@ -86,56 +86,68 @@ export default function TestPage() {
   };
 
   if (personasLoading) {
-    return <main className="mx-auto max-w-6xl p-6">Laster personas...</main>;
+    return <main className="mx-auto max-w-[900px] bg-gray-50 px-6 py-8">Laster personas...</main>;
   }
 
   if (personasError) {
-    return <main className="mx-auto max-w-6xl p-6">Kunne ikke laste personas</main>;
+    return <main className="mx-auto max-w-[900px] bg-gray-50 px-6 py-8">Kunne ikke laste personas</main>;
   }
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6">
-      <section>
-        <h1 className="mb-4 text-2xl font-semibold text-gray-900">Velg personas</h1>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {personas.map((persona) => (
-            <PersonaCard
-              key={persona.id}
-              persona={persona}
-              selected={selectedPersonaIds.has(persona.id)}
-              onClick={() => togglePersona(persona.id)}
-            />
-          ))}
-        </div>
-      </section>
+    <main className="min-h-screen bg-gray-50 px-6 py-8">
+      <div className="mx-auto max-w-[900px]">
+        <header className="mb-8 border-b border-gray-200 pb-5">
+          <h1 className="text-[28px] font-bold text-gray-900">Syntest</h1>
+          <p className="mt-1 text-sm text-gray-500">Test tjenesteendringer mot digitale innbyggertvillinger</p>
+        </header>
 
-      <HypothesisForm
-        value={hypothesis}
-        onChange={setHypothesis}
-        onSubmit={handleSubmit}
-        onSubmitAll={handleSubmitAll}
-        loading={loading}
-        selectedCount={selectedPersonaIds.size}
-      />
-
-      <section>
-        <h2 className="mb-4 text-2xl font-semibold text-gray-900">Resultater</h2>
-        {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
-        {results.length === 0 ? (
-          <p className="text-gray-600">Ingen resultater ennå. Kjør en simulering for å se svar.</p>
-        ) : (
-          <div className="grid gap-4">
-            {results.map((result) => {
-              const persona = personasById.get(result.personaId);
-              if (!persona) {
-                return null;
-              }
-
-              return <ResultCard key={result.personaId} result={result} persona={persona} />;
-            })}
+        <section className="mb-8">
+          <h2 className="mb-4 text-lg font-semibold text-gray-800">Velg personas</h2>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            {personas.map((persona) => (
+              <PersonaCard
+                key={persona.id}
+                persona={persona}
+                selected={selectedPersonaIds.has(persona.id)}
+                onClick={() => togglePersona(persona.id)}
+              />
+            ))}
           </div>
-        )}
-      </section>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="mb-4 text-lg font-semibold text-gray-800">Din hypotese</h2>
+          <HypothesisForm
+            value={hypothesis}
+            onChange={setHypothesis}
+            onSubmit={handleSubmit}
+            onSubmitAll={handleSubmitAll}
+            loading={loading}
+            selectedCount={selectedPersonaIds.size}
+          />
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-lg font-semibold text-gray-800">Resultater</h2>
+          {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
+          {results.length === 0 ? (
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-600 shadow-sm">
+              Ingen resultater ennå. Kjør en simulering for å se svar.
+            </div>
+          ) : (
+            <div>
+              {results.map((result) => {
+                const persona = personasById.get(result.personaId);
+                if (!persona) {
+                  return null;
+                }
+
+                return <ResultCard key={result.personaId} result={result} persona={persona} />;
+              })}
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   );
 }
