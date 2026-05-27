@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { simulatePersona } from "@/lib/anthropic";
 import { getPersonaById, saveTestResult } from "@/lib/db";
-import type { SimulationRequest } from "@/lib/types";
+import type { SimulationRequest, SimulationResult } from "@/lib/types";
 
 export async function POST(request: Request) {
   try {
@@ -27,12 +27,34 @@ export async function POST(request: Request) {
 
     const validPersonas = personas.filter((persona): persona is NonNullable<typeof persona> => persona !== null);
 
-    const results = await Promise.all(
-      validPersonas.map((persona) => simulatePersona(persona, hypothesis.trim())),
+    const settledResults = await Promise.allSettled(
+      validPersonas.map(async (persona) => {
+        try {
+          return await simulatePersona(persona, hypothesis.trim());
+        } catch (error) {
+          console.error(`Simulering feilet for persona ${persona.id}:`, error);
+          throw error;
+        }
+      }),
     );
 
+    const results: SimulationResult[] = settledResults.map((settled, index) => {
+      const persona = validPersonas[index];
+      if (settled.status === "fulfilled") {
+        return settled.value;
+      }
+
+      console.error(`Fallback-resultat brukt for persona ${persona.id}:`, settled.reason);
+      return {
+        personaId: persona.id,
+        error: "Simuleringen feilet for denne persona",
+      };
+    });
+
     await Promise.all(
-      results.map((result) => saveTestResult(hypothesis.trim(), result.personaId, result)),
+      results
+        .filter((result) => !result.error)
+        .map((result) => saveTestResult(hypothesis.trim(), result.personaId, result)),
     );
 
     return NextResponse.json({ results }, { status: 200 });

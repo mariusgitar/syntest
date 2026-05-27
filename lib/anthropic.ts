@@ -12,7 +12,7 @@ export const anthropic = new Anthropic({
   apiKey: anthropicApiKey,
 });
 
-type SimulationPayload = Omit<SimulationResult, "personaId">;
+type SimulationPayload = Omit<SimulationResult, "personaId" | "error">;
 
 function stripMarkdownFences(value: string): string {
   const trimmed = value.trim();
@@ -68,7 +68,7 @@ export async function simulatePersona(
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
-    max_tokens: 1000,
+    max_tokens: 2000,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
@@ -80,10 +80,17 @@ export async function simulatePersona(
 
   const sanitizedText = stripMarkdownFences(textContent);
 
+  if (sanitizedText.length === 0) {
+    throw new Error(`Tom respons fra AI for persona: ${persona.id}`);
+  }
+
   try {
     const parsed = JSON.parse(sanitizedText) as SimulationPayload;
     return mapSimulationPayloadToResult(parsed, persona.id);
-  } catch {
-    throw new Error(`Klarte ikke å tolke svar fra AI for persona: ${persona.id}`);
+  } catch (error) {
+    console.error(`Ugyldig JSON fra AI for persona ${persona.id}:`, sanitizedText);
+    throw new Error(`Klarte ikke å tolke svar fra AI for persona: ${persona.id}`, {
+      cause: error,
+    });
   }
 }
