@@ -20,20 +20,20 @@ export function PersonaCard({ persona, selected, onClick }: PersonaCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full cursor-pointer rounded-2xl border p-4 text-center transition hover:shadow-md ${
-        selected ? "border-2 border-violet-400 bg-violet-50" : "border-gray-200 bg-white"
+      className={`relative flex w-full cursor-pointer flex-col items-center rounded-2xl border border-gray-200 bg-white p-5 text-center transition-all duration-150 hover:border-gray-300 hover:shadow-md ${
+        selected ? "border-2 border-violet-400 bg-violet-50 shadow-sm" : ""
       }`}
     >
-      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full text-2xl" style={{ backgroundColor: personaColors[persona.id] ?? "#F3F4F6" }}>
+      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full text-2xl" style={{ backgroundColor: personaColors[persona.id] ?? "#F3F4F6" }}>
         {persona.emoji}
       </div>
 
-      <h3 className="text-[15px] font-medium text-gray-900">{persona.name}</h3>
-      <p className="mt-1 text-xs text-gray-500">{persona.role}</p>
+      <h3 className="mb-0.5 text-sm font-semibold text-gray-900">{persona.name}</h3>
+      <p className="mb-3 text-xs text-gray-500">{persona.role}</p>
 
-      <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+      <div className="flex flex-wrap gap-1 justify-center">
         {persona.traits.map((trait) => (
-          <span key={trait} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+          <span key={trait} className="text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">
             {trait}
           </span>
         ))}

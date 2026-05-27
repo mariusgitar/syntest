@@ -86,23 +86,24 @@ export default function TestPage() {
   };
 
   if (personasLoading) {
-    return <main className="mx-auto max-w-[900px] bg-gray-50 px-6 py-8">Laster personas...</main>;
+    return <main className="min-h-screen bg-gray-50"><div className="max-w-4xl mx-auto px-6 py-10">Laster personas...</div></main>;
   }
 
   if (personasError) {
-    return <main className="mx-auto max-w-[900px] bg-gray-50 px-6 py-8">Kunne ikke laste personas</main>;
+    return <main className="min-h-screen bg-gray-50"><div className="max-w-4xl mx-auto px-6 py-10">Kunne ikke laste personas</div></main>;
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-8">
-      <div className="mx-auto max-w-[900px]">
-        <header className="mb-8 border-b border-gray-200 pb-5">
-          <h1 className="text-[28px] font-bold text-gray-900">Syntest</h1>
-          <p className="mt-1 text-sm text-gray-500">Test tjenesteendringer mot digitale innbyggertvillinger</p>
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <header className="mb-10">
+          <h1 className="text-3xl font-bold text-gray-900">Syntest</h1>
+          <p className="mt-1 text-gray-500 text-base">Test tjenesteendringer mot digitale innbyggertvillinger</p>
+        <div className="mt-6 border-b border-gray-200" />
         </header>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-lg font-semibold text-gray-800">Velg personas</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Velg personas</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {personas.map((persona) => (
               <PersonaCard
@@ -116,7 +117,7 @@ export default function TestPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-lg font-semibold text-gray-800">Din hypotese</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Din hypotese</h2>
           <HypothesisForm
             value={hypothesis}
             onChange={setHypothesis}
@@ -128,10 +129,10 @@ export default function TestPage() {
         </section>
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold text-gray-800">Resultater</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Resultater</h2>
           {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
           {results.length === 0 ? (
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-600 shadow-sm">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
               Ingen resultater ennå. Kjør en simulering for å se svar.
             </div>
           ) : (

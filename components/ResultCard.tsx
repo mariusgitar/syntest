@@ -8,15 +8,15 @@ type ResultCardProps = {
 function scoreColor(score: number) {
   if (score >= 7) return "text-green-600";
   if (score >= 4) return "text-amber-500";
-  return "text-red-600";
+  return "text-red-500";
 }
 
 export function ResultCard({ result, persona }: ResultCardProps) {
   if (result.error) {
     return (
-      <article className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">
-        <p className="text-sm font-medium">{persona.name}</p>
-        <p className="mt-1 text-sm">{result.error}</p>
+      <article className="bg-red-50 rounded-2xl border border-red-200 p-6 mb-4 text-sm text-red-600">
+        <p className="font-medium">{persona.name}</p>
+        <p className="mt-1">{result.error}</p>
       </article>
     );
   }
@@ -24,40 +24,42 @@ export function ResultCard({ result, persona }: ResultCardProps) {
   const score = result.villighet_til_endring ?? 0;
 
   return (
-    <article className="mb-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <header className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg">{persona.emoji}</div>
+    <article className="bg-white rounded-2xl border border-gray-200 p-6 mb-4">
+      <header className="flex items-center gap-3 mb-4">
+        <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl" style={{ backgroundColor: "#F3F4F6" }}>{persona.emoji}</div>
         <div>
-          <p className="font-medium text-gray-900">{persona.name}</p>
+          <p className="text-base font-semibold text-gray-900">{persona.name}</p>
           <p className="text-sm text-gray-500">{persona.role}</p>
         </div>
       </header>
 
-      <blockquote className="my-4 rounded-r-xl border-l-4 border-violet-300 bg-violet-50 py-3 pl-4 text-sm italic text-gray-700">
+      <blockquote className="border-l-4 border-violet-300 bg-violet-50 rounded-r-xl px-4 py-3 my-4 text-sm italic text-gray-700">
         “{result.reaksjon}”
       </blockquote>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-xl bg-gray-50 p-3 text-center">
-          <p className={`text-2xl font-semibold ${scoreColor(score)}`}>{score}</p>
+      <div className="grid grid-cols-3 gap-3 my-4">
+        <div className="bg-gray-50 rounded-xl p-4 text-center">
+          <p className={`text-2xl font-bold mb-1 ${scoreColor(score)}`}>{score}</p>
           <p className="text-xs text-gray-500">Villighet</p>
+          <p className="text-xs text-gray-400 mt-1 line-clamp-2">Skår fra 1 til 10</p>
         </div>
 
-        <div className="rounded-xl bg-gray-50 p-3 text-center">
-          <p className="text-2xl font-semibold text-orange-500">{result.bekymringer?.length ?? 0}</p>
+        <div className="bg-gray-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold mb-1 text-amber-500">{result.bekymringer?.length ?? 0}</p>
           <p className="text-xs text-gray-500">Bekymringer</p>
-          <p className="mt-1 text-xs text-gray-600">{result.bekymringer?.[0] ?? "Ingen bekymringer"}</p>
+          <p className="text-xs text-gray-400 mt-1 line-clamp-2">{result.bekymringer?.[0] ?? "Ingen bekymringer"}</p>
         </div>
 
-        <div className="rounded-xl bg-gray-50 p-3 text-center">
+        <div className="bg-gray-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold mb-1 text-red-500">{result.barrier ? 1 : 0}</p>
           <p className="text-xs text-gray-500">Barrière</p>
-          <p className="mt-1 text-sm text-gray-700">{result.barrier}</p>
+          <p className="text-xs text-gray-400 mt-1 line-clamp-2">{result.barrier}</p>
         </div>
       </div>
 
-      <section className="mt-4 rounded-xl bg-violet-50 p-4">
-        <p className="text-xs font-medium text-violet-700">Forslag</p>
-        <p className="mt-1 text-sm italic text-violet-900">{result.forslag}</p>
+      <section className="bg-violet-50 rounded-xl p-4 mt-2">
+        <p className="text-xs font-semibold text-violet-700 mb-1">Forslag</p>
+        <p className="text-sm italic text-violet-900">{result.forslag}</p>
       </section>
     </article>
   );
