@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { HypothesisForm } from "@/components/HypothesisForm";
 import { PersonaCard } from "@/components/PersonaCard";
 import { ResultCard } from "@/components/ResultCard";
+import { PersonaModal } from "@/components/PersonaModal";
 import { Persona, SimulationResult } from "@/lib/types";
 
 export default function TestPage() {
@@ -11,6 +12,7 @@ export default function TestPage() {
   const [personasLoading, setPersonasLoading] = useState(true);
   const [personasError, setPersonasError] = useState(false);
   const [selectedPersonaIds, setSelectedPersonaIds] = useState<Set<string>>(new Set());
+  const [activePersona, setActivePersona] = useState<Persona | null>(null);
   const [hypothesis, setHypothesis] = useState("");
   const [results, setResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -111,6 +113,7 @@ export default function TestPage() {
                 persona={persona}
                 selected={selectedPersonaIds.has(persona.id)}
                 onClick={() => togglePersona(persona.id)}
+                onInfo={() => setActivePersona(persona)}
               />
             ))}
           </div>
@@ -149,6 +152,16 @@ export default function TestPage() {
           )}
         </section>
       </div>
+      <PersonaModal
+        persona={activePersona}
+        isSelected={activePersona ? selectedPersonaIds.has(activePersona.id) : false}
+        onToggleSelect={() => {
+          if (activePersona) {
+            togglePersona(activePersona.id);
+          }
+        }}
+        onClose={() => setActivePersona(null)}
+      />
     </main>
   );
 }
