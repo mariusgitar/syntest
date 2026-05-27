@@ -51,23 +51,23 @@ function mapTestResultRow(row: TestResultRow): TestResult {
 }
 
 export async function getPersonas(): Promise<Persona[]> {
-  const rows = await sql<PersonaRow[]>`
+  const rows = (await sql`
     SELECT id, name, role, emoji, traits, description, livssituasjon
     FROM personas
     WHERE is_active = true
     ORDER BY name
-  `;
+  `) as PersonaRow[];
 
   return rows.map(mapPersonaRow);
 }
 
 export async function getPersonaById(id: string): Promise<Persona | null> {
-  const rows = await sql<PersonaRow[]>`
+  const rows = (await sql`
     SELECT id, name, role, emoji, traits, description, livssituasjon
     FROM personas
     WHERE id = ${id}
     LIMIT 1
-  `;
+  `) as PersonaRow[];
 
   const persona = rows[0];
   return persona ? mapPersonaRow(persona) : null;
@@ -85,13 +85,13 @@ export async function saveTestResult(
 }
 
 export async function getRecentResults(limit: number): Promise<TestResult[]> {
-  const rows = await sql<TestResultRow[]>`
+  const rows = (await sql`
     SELECT tr.id, tr.hypothesis, tr.persona_id, tr.result, tr.created_at
     FROM test_results tr
     INNER JOIN personas p ON p.id = tr.persona_id
     ORDER BY tr.created_at DESC
     LIMIT ${limit}
-  `;
+  `) as TestResultRow[];
 
   return rows.map(mapTestResultRow);
 }
