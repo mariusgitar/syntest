@@ -5,13 +5,9 @@ type HypothesisFormProps = {
   onSubmitAll: () => void;
   loading: boolean;
   selectedCount: number;
+  placeholder: string;
+  examples: string[];
 };
-
-const examples = [
-  "Stenge fysisk servicekontor og flytte alt digitalt",
-  "Ny app for timebestilling hos helsesøster",
-  "Automatisk AI-behandling av hjelpesøknader",
-];
 
 export function HypothesisForm({
   value,
@@ -20,13 +16,15 @@ export function HypothesisForm({
   onSubmitAll,
   loading,
   selectedCount,
+  placeholder,
+  examples,
 }: HypothesisFormProps) {
   const isValueEmpty = value.trim().length === 0;
 
   return (
     <section className="bg-white rounded-2xl border border-gray-200 p-6">
       <label htmlFor="hypothesis" className="block text-sm font-medium text-gray-700 mb-2">
-        Beskriv endringen eller tjenesten du vil teste
+        Beskriv innholdet du vil teste
       </label>
 
       <textarea
@@ -34,7 +32,7 @@ export function HypothesisForm({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-300 p-3 text-sm text-gray-800 resize-none min-h-24"
-        placeholder="Skriv inn hypotese her..."
+        placeholder={placeholder}
       />
 
       <div className="flex flex-wrap gap-2 mt-3 mb-4">

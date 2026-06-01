@@ -1,4 +1,4 @@
-export type Persona = {
+export type StaticPersona = {
   id: string;
   name: string;
   role: string;
@@ -8,9 +8,16 @@ export type Persona = {
   livssituasjon: string;
 };
 
+export type Persona = StaticPersona & {
+  gruppe: string;
+};
+
+export type SimulationMode = "hypotese" | "kommunikasjon" | "horing";
+
 export type SimulationRequest = {
   personaIds: string[];
   hypothesis: string;
+  mode: SimulationMode;
 };
 
 export type SimulationResult = {

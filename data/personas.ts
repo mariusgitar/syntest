@@ -1,6 +1,6 @@
-import type { Persona } from "@/lib/types";
+import type { StaticPersona } from "@/lib/types";
 
-export const PERSONAS: Persona[] = [
+export const PERSONAS: StaticPersona[] = [
   {
     id: "kari-72",
     name: "Kari (72)",
@@ -69,6 +69,6 @@ export const PERSONAS: Persona[] = [
   },
 ];
 
-export function getPersonaById(id: string): Persona | undefined {
+export function getPersonaById(id: string): StaticPersona | undefined {
   return PERSONAS.find((persona) => persona.id === id);
 }

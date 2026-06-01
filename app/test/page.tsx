@@ -5,7 +5,55 @@ import { HypothesisForm } from "@/components/HypothesisForm";
 import { PersonaCard } from "@/components/PersonaCard";
 import { ResultCard } from "@/components/ResultCard";
 import { PersonaModal } from "@/components/PersonaModal";
-import { Persona, SimulationResult } from "@/lib/types";
+import type { Persona, SimulationMode, SimulationResult } from "@/lib/types";
+
+type GroupFilter = {
+  label: string;
+  value: string | null;
+};
+
+const modeOptions: Array<{ mode: SimulationMode; label: string }> = [
+  { mode: "hypotese", label: "Hypotesetest" },
+  { mode: "kommunikasjon", label: "Kommunikasjon" },
+  { mode: "horing", label: "Høring" },
+];
+
+const modeDescriptions: Record<SimulationMode, string> = {
+  hypotese: "Test hvordan personas reagerer på en tjenesteendring eller nytt tiltak",
+  kommunikasjon: "Se om kommunens budskap treffer og oppleves relevant",
+  horing: "Få innspill på planer og høringsdokumenter",
+};
+
+const modePlaceholders: Record<SimulationMode, string> = {
+  hypotese: "Beskriv tjenesteendringen eller tiltaket du vil teste...",
+  kommunikasjon:
+    "Lim inn eller beskriv kommunikasjonen du vil teste (pressemelding, informasjonsskriv, SMS-varsling...)...",
+  horing: "Lim inn eller beskriv planen eller høringsdokumentet du vil ha innspill på...",
+};
+
+const modeExamples: Record<SimulationMode, string[]> = {
+  hypotese: [
+    "Stenge fysisk servicekontor og flytte alt digitalt",
+    "Ny app for timebestilling hos helsesøster",
+    "Automatisk AI-behandling av hjelpesøknader",
+  ],
+  kommunikasjon: [
+    "Pressemelding om ny parkeringspolitikk i sentrum",
+    "SMS-varsling om vannstans",
+    "Informasjonsskriv om barnehageopptak",
+  ],
+  horing: [
+    "Kommuneplanens arealdel 2025–2037",
+    "Ny alkoholpolitisk handlingsplan",
+    "Handlingsplan for universell utforming",
+  ],
+};
+
+const groupFilters: GroupFilter[] = [
+  { label: "Alle", value: null },
+  { label: "Innbyggere", value: "innbygger" },
+  { label: "Ansatte", value: "ansatt" },
+];
 
 export default function TestPage() {
   const [personas, setPersonas] = useState<Persona[]>([]);
@@ -14,6 +62,8 @@ export default function TestPage() {
   const [selectedPersonaIds, setSelectedPersonaIds] = useState<Set<string>>(new Set());
   const [activePersona, setActivePersona] = useState<Persona | null>(null);
   const [hypothesis, setHypothesis] = useState("");
+  const [mode, setMode] = useState<SimulationMode>("hypotese");
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [results, setResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,14 +73,18 @@ export default function TestPage() {
       try {
         setPersonasLoading(true);
         setPersonasError(false);
-        const response = await fetch("/api/personas");
+        const query = activeGroup ? `?gruppe=${encodeURIComponent(activeGroup)}` : "";
+        const response = await fetch(`/api/personas${query}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch personas");
         }
 
         const data: Persona[] = await response.json();
+        const fetchedPersonaIds = new Set(data.map((persona) => persona.id));
         setPersonas(data);
+        setSelectedPersonaIds((prev) => new Set([...prev].filter((id) => fetchedPersonaIds.has(id))));
+        setActivePersona((prev) => (prev && fetchedPersonaIds.has(prev.id) ? prev : null));
       } catch (_error) {
         setPersonasError(true);
       } finally {
@@ -39,7 +93,7 @@ export default function TestPage() {
     }
 
     void fetchPersonas();
-  }, []);
+  }, [activeGroup]);
 
   const personasById = useMemo(() => {
     return new Map(personas.map((persona) => [persona.id, persona]));
@@ -63,7 +117,7 @@ export default function TestPage() {
       const response = await fetch("/api/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personaIds, hypothesis }),
+        body: JSON.stringify({ personaIds, hypothesis, mode }),
       });
 
       if (!response.ok) {
@@ -101,11 +155,53 @@ export default function TestPage() {
         <header className="mb-10">
           <h1 className="text-3xl font-bold text-gray-900">Syntest</h1>
           <p className="mt-1 text-gray-500 text-base">Test tjenesteendringer mot digitale innbyggertvillinger</p>
-        <div className="mt-6 border-b border-gray-200" />
+          <div className="mt-6 border-b border-gray-200" />
         </header>
 
         <section className="mb-8">
+          <div className="flex flex-wrap gap-2">
+            {modeOptions.map((option) => {
+              const isActive = option.mode === mode;
+              return (
+                <button
+                  key={option.mode}
+                  type="button"
+                  onClick={() => setMode(option.mode)}
+                  className={
+                    isActive
+                      ? "bg-violet-600 text-white rounded-full px-4 py-2 text-sm font-medium"
+                      : "bg-white border border-gray-200 text-gray-600 rounded-full px-4 py-2 text-sm"
+                  }
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-sm text-gray-600">{modeDescriptions[mode]}</p>
+        </section>
+
+        <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Velg personas</h2>
+          <div className="mb-4 flex flex-wrap gap-2">
+            {groupFilters.map((filter) => {
+              const isActive = filter.value === activeGroup;
+              return (
+                <button
+                  key={filter.label}
+                  type="button"
+                  onClick={() => setActiveGroup(filter.value)}
+                  className={
+                    isActive
+                      ? "bg-gray-900 text-white rounded-full px-3 py-1 text-xs font-medium"
+                      : "bg-gray-100 text-gray-600 rounded-full px-3 py-1 text-xs"
+                  }
+                >
+                  {filter.label}
+                </button>
+              );
+            })}
+          </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {personas.map((persona) => (
               <PersonaCard
@@ -120,7 +216,7 @@ export default function TestPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Din hypotese</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Din test</h2>
           <HypothesisForm
             value={hypothesis}
             onChange={setHypothesis}
@@ -128,6 +224,8 @@ export default function TestPage() {
             onSubmitAll={handleSubmitAll}
             loading={loading}
             selectedCount={selectedPersonaIds.size}
+            placeholder={modePlaceholders[mode]}
+            examples={modeExamples[mode]}
           />
         </section>
 

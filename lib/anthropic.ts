@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-import type { Persona, SimulationResult } from "@/lib/types";
+import type { Persona, SimulationMode, SimulationResult } from "@/lib/types";
 
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -13,6 +13,14 @@ export const anthropic = new Anthropic({
 });
 
 type SimulationPayload = Omit<SimulationResult, "personaId" | "error">;
+
+const modeInstructions: Record<SimulationMode, string> = {
+  hypotese: "Du reagerer på en foreslått tjenesteendring eller nytt tiltak.",
+  kommunikasjon:
+    "Du mottar en kommunikasjon fra kommunen (pressemelding, informasjonsskriv e.l.) og gir tilbakemelding på om budskapet treffer, er forståelig og relevant for deg.",
+  horing:
+    "Du leser et høringsdokument eller en plan fra kommunen og gir innspill slik du ville gjort i en reell høringsprosess.",
+};
 
 function stripMarkdownFences(value: string): string {
   const trimmed = value.trim();
@@ -45,6 +53,7 @@ function mapSimulationPayloadToResult(
 export async function simulatePersona(
   persona: Persona,
   hypothesis: string,
+  mode: SimulationMode,
 ): Promise<SimulationResult> {
   const systemPrompt = [
     "Du er en digital tvilling av en innbygger og skal svare i første person.",
@@ -64,11 +73,11 @@ export async function simulatePersona(
     'Krav: "reaksjon" skal være 2–4 setninger i første person, "villighet_til_endring" skal være et heltall fra 1 til 10.',
   ].join("\n");
 
-  const userPrompt = `Kommunen vurderer følgende endring eller tiltak:\n\n"${hypothesis}"\n\nHvordan reagerer du på dette?`;
+  const userPrompt = `${modeInstructions[mode]}\n\nInnhold fra kommunen:\n\n"${hypothesis}"\n\nHvordan reagerer du på dette?`;
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
-    max_tokens: 2000,
+    max_tokens: 1000,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });

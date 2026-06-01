@@ -18,6 +18,7 @@ type PersonaRow = {
   traits: string[];
   description: string;
   livssituasjon: string;
+  gruppe: string;
 };
 
 type TestResultRow = {
@@ -37,6 +38,7 @@ function mapPersonaRow(row: PersonaRow): Persona {
     traits: row.traits,
     description: row.description,
     livssituasjon: row.livssituasjon,
+    gruppe: row.gruppe,
   };
 }
 
@@ -52,7 +54,7 @@ function mapTestResultRow(row: TestResultRow): TestResult {
 
 export async function getPersonas(): Promise<Persona[]> {
   const rows = (await sql`
-    SELECT id, name, role, emoji, traits, description, livssituasjon
+    SELECT id, name, role, emoji, traits, description, livssituasjon, gruppe
     FROM personas
     WHERE is_active = true
     ORDER BY name
@@ -61,9 +63,20 @@ export async function getPersonas(): Promise<Persona[]> {
   return rows.map(mapPersonaRow);
 }
 
+export async function getPersonasByGroup(gruppe: string): Promise<Persona[]> {
+  const rows = (await sql`
+    SELECT id, name, role, emoji, traits, description, livssituasjon, gruppe
+    FROM personas
+    WHERE is_active = true AND gruppe = ${gruppe}
+    ORDER BY name
+  `) as PersonaRow[];
+
+  return rows.map(mapPersonaRow);
+}
+
 export async function getPersonaById(id: string): Promise<Persona | null> {
   const rows = (await sql`
-    SELECT id, name, role, emoji, traits, description, livssituasjon
+    SELECT id, name, role, emoji, traits, description, livssituasjon, gruppe
     FROM personas
     WHERE id = ${id}
     LIMIT 1
