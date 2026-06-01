@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 
 import { simulatePersona } from "@/lib/anthropic";
 import { getPersonaById, saveTestResult } from "@/lib/db";
-import type { SimulationRequest, SimulationResult } from "@/lib/types";
+import type { SimulationMode, SimulationRequest, SimulationResult } from "@/lib/types";
+
+const simulationModes: SimulationMode[] = ["hypotese", "kommunikasjon", "horing"];
+
+function isSimulationMode(value: unknown): value is SimulationMode {
+  return typeof value === "string" && simulationModes.includes(value as SimulationMode);
+}
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<SimulationRequest>;
     const { personaIds, hypothesis } = body;
+    const mode = isSimulationMode(body.mode) ? body.mode : "hypotese";
 
     if (typeof hypothesis !== "string" || hypothesis.trim().length === 0) {
       return NextResponse.json({ error: "Hypotese mangler" }, { status: 400 });
@@ -30,7 +37,7 @@ export async function POST(request: Request) {
     const settledResults = await Promise.allSettled(
       validPersonas.map(async (persona) => {
         try {
-          return await simulatePersona(persona, hypothesis.trim());
+          return await simulatePersona(persona, hypothesis.trim(), mode);
         } catch (error) {
           console.error(`Simulering feilet for persona ${persona.id}:`, error);
           throw error;
