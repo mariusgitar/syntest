@@ -53,6 +53,9 @@ const groupFilters: GroupFilter[] = [
   { label: "Alle", value: null },
   { label: "Innbyggere", value: "innbygger" },
   { label: "Ansatte", value: "ansatt" },
+  { label: "Næringsliv", value: "naering" },
+  { label: "Offentlige instanser", value: "offentlig" },
+  { label: "Politikere", value: "politiker" },
 ];
 
 export default function TestPage() {
